@@ -1,8 +1,8 @@
 # app/api/v1/routes.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.api.v1.schemas import ForgetPasswordRequest, RegisterRequest, ResetPasswordRequest, VerifyRequest, LoginRequest, RegisterResponse, VerifyResponse, LoginResponse, UserRegister
-from app.api.v1.controllers import forget_password, register_user, reset_password, verify_user, login_user, get_all_users
+from app.api.v1.schemas import ForgetPasswordRequest, OTPRequestSchema, OTPResponseSchema, OTPVerifySchema, RegisterRequest, ResetPasswordRequest, VerifyRequest, LoginRequest, RegisterResponse, VerifyResponse, LoginResponse, UserRegister
+from app.api.v1.controllers import forget_password, register_user, request_otp, reset_password, verify_otp, verify_user, login_user, get_all_users
 from app.db.database import get_db
 
 from typing import List
@@ -14,7 +14,7 @@ router = APIRouter()
 async def register(request: RegisterRequest, db: Session = Depends(get_db)):
     data = register_user(request, db)
     return {
-        "message": "User registered successfully",
+        "message": "Registration successful, please verify your email",
         "data": data
     }
 
@@ -44,5 +44,10 @@ def get_all_users_endpoint(db: Session = Depends(get_db)):
     return get_all_users(db)
 
 
+@router.post("/request-otp", response_model=OTPResponseSchema)
+def request_otp_route(data: OTPRequestSchema, db: Session = Depends(get_db)):
+    return request_otp(data.email, db)
 
-    
+@router.post("/verify-otp", response_model=OTPResponseSchema)
+def verify_otp_route(data: OTPVerifySchema, db: Session = Depends(get_db)):
+    return verify_otp(data.email, data.otp_code, db)

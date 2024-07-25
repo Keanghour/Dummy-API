@@ -1,15 +1,13 @@
 # app/api/v1/schemas.py
 from pydantic import BaseModel
 from typing import Optional
-
-
 from datetime import datetime
 
 class UserRegisterBase(BaseModel):
     firstname: str
     lastname: str
     email: str
-    role: str
+    role: Optional[str]
     is_active: bool
 
 class UserRegisterCreate(UserRegisterBase):
@@ -22,7 +20,6 @@ class UserRegister(UserRegisterBase):
 
     class Config:
         orm_mode = True
-
 
 
 class RegisterRequest(BaseModel):
@@ -58,3 +55,21 @@ class ResetPasswordRequest(BaseModel):
     password: str
     password_confirmation: str
     password_token: str
+
+
+
+class OTPRequestSchema(BaseModel):
+    email: str
+
+class OTPVerifySchema(BaseModel):
+    email: str
+    otp_code: str
+
+class OTPResponseSchema(BaseModel):
+    otp_code: Optional[str] = None
+    access_token: Optional[str] = None
+
+
+
+
+

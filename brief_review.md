@@ -1,4 +1,4 @@
-**Review of Your Project Structure**
+Review of Your Project Structure
 
 1.  API Folder (app/api/v1/)
   o __init__.py: Good for initializing the package.
