@@ -1,0 +1,27 @@
+- API Overview
+    
+    ### API Overview
+    
+    This API provides a set of functionalities for user authentication, product management, and general administration. It's suitable for applications like admin dashboards, blogs, or online stores.
+    
+    ### Core Features
+    
+    - **User Authentication:**
+        - Register new users
+        - Verify user accounts
+        - User login and logout
+        - Password reset and OTP verification
+    - **Product Management:**
+        - Adding, editing, and deleting products
+    
+    ### Technical Implementation
+    
+    - **Database:** SQLite is used as the underlying database for storing user and product information.
+    - **Security:**
+        - **JWT (JSON Web Token):** Used for user authentication with HS256 signing algorithm. Includes access and refresh tokens for session management.
+        - **OAuth 2.0:** Implemented for data encryption (specific details about OAuth 2.0 usage would be helpful).
+    
+    ### Development Tools
+    
+    - **Postman Collection:** A pre-built Postman collection is available for API testing and exploration.
+    - **Documentation:** Comprehensive documentation, including code examples and tutorials, is provided for both frontend and backend developers to seamlessly integrate with the API.
