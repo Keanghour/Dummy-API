@@ -1,14 +1,14 @@
 # app/api/products/routers.py
-from fastapi import APIRouter, HTTPException, Depends, Body, Header, Path
+from fastapi import APIRouter, HTTPException, Depends, Body, Header, Path, Query
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.responses import PlainTextResponse
 import json
 
-from .schemas import ProductCreate, ProductResponse
+from .schemas import ProductCreate, ProductCreates_Optional, ProductResponse
 from app.db.database import get_db
 from app.utils.security import get_current_active_user
-from app.api.products.controllers import create_product, get_all_products, decrypt_data, update_product, delete_product
+from app.api.products.controllers import create_product, create_products_Optional, get_all_products, decrypt_data, update_product, delete_product, get_product_by_id
 from app.core.config import settings
 
 p_router = APIRouter()
@@ -28,13 +28,16 @@ async def create_product_route(
 @p_router.get("/products", response_model=List[ProductResponse])
 def get_products_route(
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_active_user)
+    current_user: str = Depends(get_current_active_user),
+    limit: int = Query(10, le=100, description="Number of products to return"),
+    offset: int = Query(0, ge=0, description="Number of products to skip")
 ):
     try:
-        products = get_all_products(db)
+        products = get_all_products(db, limit=limit, offset=offset)
         return products
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving products")
+        print(f"Error: {str(e)}")  # Print the error for debugging
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving products: {str(e)}")
 
 @p_router.post("/decrypt", response_class=PlainTextResponse)
 def decrypt_product(
@@ -80,3 +83,52 @@ def delete_product_route(
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred during product deletion")
+
+@p_router.post("/products-Optional", response_class=PlainTextResponse)
+async def create_product_route(
+    product: ProductCreates_Optional,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_active_user)
+):
+    try:
+        encrypted_data = create_products_Optional(product, db)
+        return PlainTextResponse(content=encrypted_data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred during product creation")
+    
+
+
+@p_router.get("/products/{product_id}", response_model=ProductResponse)
+def get_product_route(
+    product_id: int = Path(..., description="The ID of the product to retrieve"),
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_active_user)
+):
+    try:
+        product = get_product_by_id(product_id, db)
+        if product:
+            return product
+        else:
+            raise HTTPException(status_code=404, detail="Product not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the product: {str(e)}")
+    
+
+
+@p_router.get("/products", response_model=List[ProductResponse])
+def get_products_route(
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_active_user),
+    limit: int = Query(10, le=100, description="Number of products to return"),
+    offset: int = Query(0, ge=0, description="Number of products to skip")
+):
+    try:
+        products = get_all_products(db, limit=limit, offset=offset)
+        return products
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Print the error for debugging
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving products: {str(e)}")
+
+    
+
+
